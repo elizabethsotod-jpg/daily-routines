@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Routines Mission PRO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --amber: #f59e0b;
+      --sky: #0ea5e9;
+      --emerald: #10b981;
+      --violet: #8b5cf6;
+      --rose: #f43f5e;
+      --peach: #fb923c;
+      --bg: #fef9f0;
+      --card: #ffffff;
+      --text: #1c1917;
+      --muted: #78716c;
+      --border: #e7e5e4;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Animated background blobs */
+    .bg-blob {
+      position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+      filter: blur(60px); opacity: 0.35;
+    }
+    .blob1 { width:420px; height:420px; background:#fde68a; top:-120px; left:-100px; animation: blobMove1 12s ease-in-out infinite; }
+    .blob2 { width:350px; height:350px; background:#bae6fd; bottom:-80px; right:-80px; animation: blobMove2 15s ease-in-out infinite; }
+    .blob3 { width:280px; height:280px; background:#d9f99d; top:40%; left:60%; animation: blobMove3 10s ease-in-out infinite; }
+    @keyframes blobMove1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(40px,30px) scale(1.08)} }
+    @keyframes blobMove2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-30px,-40px) scale(1.05)} }
+    @keyframes blobMove3 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-50px,20px) scale(0.95)} }
+
+    .app {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 24px 16px 40px;
+    }
+
+    /* ─── TOP NAV BAR ─── */
+    .topbar {
+      width: 100%; max-width: 720px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    .logo {
+      font-family: 'Baloo 2', cursive;
+      font-size: 1.4rem; font-weight: 800;
+      color: var(--amber);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .progress-pills {
+      display: flex; gap: 8px;
+    }
+    .pill {
+      width: 36px; height: 10px;
+      border-radius: 999px;
+      background: var(--border);
+      transition: background 0.4s;
+    }
+    .pill.done { background: var(--emerald); }
+    .pill.active { background: var(--amber); animation: pillPulse 1.5s ease-in-out infinite; }
+    @keyframes pillPulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+    .player-chip {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 0.82rem; font-weight: 700;
+      color: var(--muted);
+    }
+
+    /* ─── CARD ─── */
+    .card {
+      background: var(--card);
+      width: 100%; max-width: 720px;
+      border-radius: 28px;
+      padding: 36px 32px;
+      box-shadow: 0 12px 50px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.04);
+      animation: cardIn 0.5s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes cardIn { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+    .hidden { display: none !important; }
+
+    /* ─── SHARED ELEMENTS ─── */
+    .section-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #fef3c7;
+      border: 1.5px solid #fde68a;
+      color: #92400e;
+      font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1.2px;
+      padding: 4px 12px; border-radius: 999px;
+      margin-bottom: 14px;
+    }
+    .section-tag.blue { background: #eff6ff; border-color: #bfdbfe; color: #1e40af; }
+    .section-tag.green { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+    .section-tag.purple { background: #faf5ff; border-color: #e9d5ff; color: #6b21a8; }
+
+    h2.screen-title {
+      font-family: 'Baloo 2', cursive;
+      font-size: 2rem; font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px; line-height: 1.2;
+    }
+    p.screen-sub {
+      color: var(--muted); font-size: 0.95rem; line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700; border: none; cursor: pointer;
+      border-radius: 14px; font-size: 1rem;
+      padding: 13px 24px;
+      transition: transform 0.15s, filter 0.15s, box-shadow 0.15s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn:hover { transform: translateY(-2px); filter: brightness(1.07); }
+    .btn:active { transform: translateY(0); filter: brightness(0.96); }
+    .btn-amber { background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; box-shadow: 0 6px 20px rgba(245,158,11,0.4); }
+    .btn-sky   { background: linear-gradient(135deg, #0ea5e9, #6366f1); color: white; box-shadow: 0 6px 20px rgba(14,165,233,0.4); }
+    .btn-emerald { background: linear-gradient(135deg, #10b981, #0ea5e9); color: white; box-shadow: 0 6px 20px rgba(16,185,129,0.4); }
+    .btn-violet  { background: linear-gradient(135deg, #8b5cf6, #ec4899); color: white; box-shadow: 0 6px 20px rgba(139,92,246,0.4); }
+    .btn-ghost { background: #f5f5f4; color: var(--muted); }
+    .btn-ghost:hover { background: #e7e5e4; }
+    .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+
+    /* ─── INPUTS ─── */
+    .name-input {
+      width: 100%; padding: 14px 20px;
+      border: 2.5px solid var(--border); border-radius: 14px;
+      font-family: 'Quicksand', sans-serif; font-size: 1rem; font-weight: 700;
+      color: var(--text); outline: none; background: #fafaf9;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      margin-bottom: 16px;
+    }
+    .name-input::placeholder { color: #d6d3d1; }
+    .name-input:focus { border-color: var(--amber); box-shadow: 0 0 0 4px #fde68a50; background: white; }
+
+    /* ─── ACTIVITY SELECTOR ─── */
+    .activity-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 14px; margin: 20px 0;
+    }
+    @media(max-width:520px) { .activity-grid { grid-template-columns: 1fr; } }
+    .activity-card {
+      border: 2.5px solid var(--border); border-radius: 20px;
+      padding: 20px 14px; text-align: center; cursor: pointer;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s, background 0.2s;
+      background: #fafaf9;
+    }
+    .activity-card:hover { border-color: var(--amber); transform: translateY(-4px); box-shadow: 0 8px 24px rgba(245,158,11,0.15); background: white; }
+    .activity-card .ac-icon { font-size: 2.4rem; display: block; margin-bottom: 10px; }
+    .activity-card .ac-title { font-family: 'Baloo 2', cursive; font-size: 1rem; font-weight: 800; color: var(--text); }
+    .activity-card .ac-desc { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+    .activity-card.locked { opacity: 0.4; cursor: not-allowed; }
+    .activity-card.locked:hover { transform: none; box-shadow: none; border-color: var(--border); }
+    .activity-card.completed { border-color: var(--emerald); background: #f0fdf4; }
+    .activity-card.completed .ac-icon::after { content: ' ✅'; font-size: 1rem; }
+
+    /* ─── PROGRESS HEADER in game ─── */
+    .game-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 18px;
+    }
+    .game-title { font-family: 'Baloo 2', cursive; font-size: 1.1rem; font-weight: 700; color: var(--muted); }
+    .score-badge {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: white; font-family: 'Baloo 2', cursive; font-size: 1rem; font-weight: 800;
+      padding: 5px 16px; border-radius: 999px;
+      box-shadow: 0 4px 12px rgba(251,191,36,0.4);
+    }
+    .progress-track {
+      background: #e7e5e4; border-radius: 999px; height: 8px; margin-bottom: 24px; overflow: hidden;
+    }
+    .progress-fill { height: 100%; width: 0%; border-radius: 999px;
+      background: linear-gradient(90deg, #34d399, #0ea5e9); transition: width 0.5s cubic-bezier(.22,1,.36,1); }
+
+    /* ─── QUIZ ACTIVITY ─── */
+    .q-num { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--sky); margin-bottom: 8px; }
+    .q-text { font-family: 'Baloo 2', cursive; font-size: 1.55rem; font-weight: 700; color: var(--text); margin-bottom: 22px; line-height: 1.3; }
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option-btn {
+      background: #fafaf9; border: 2.5px solid var(--border);
+      color: var(--text); text-align: left;
+      padding: 13px 18px; border-radius: 14px;
+      font-family: 'Quicksand', sans-serif; font-size: 0.97rem; font-weight: 700;
+      display: flex; align-items: center; gap: 12px; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    }
+    .option-btn:hover:not(:disabled) { border-color: var(--sky); background: #f0f9ff; transform: translateX(4px); }
+    .opt-letter {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: #e7e5e4; font-size: 0.8rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background 0.2s, color 0.2s;
+    }
+    .option-btn.correct { border-color: var(--emerald); background: #f0fdf4; animation: pop 0.35s ease; }
+    .option-btn.correct .opt-letter { background: var(--emerald); color: white; }
+    .option-btn.wrong { border-color: var(--rose); background: #fff1f2; animation: shake 0.4s ease; }
+    .option-btn.wrong .opt-letter { background: var(--rose); color: white; }
+    @keyframes pop { 0%{transform:scale(1)} 40%{transform:scale(1.04)} 100%{transform:scale(1)} }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-7px)} 75%{transform:translateX(7px)} }
+
+    /* ─── READING COMPREHENSION ─── */
+    .reading-passage {
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border: 2px solid #fde68a; border-radius: 18px;
+      padding: 22px 24px; margin-bottom: 22px;
+      font-size: 0.97rem; line-height: 1.85; color: var(--text);
+      position: relative;
+    }
+    .reading-passage::before {
+      content: '📖';
+      position: absolute; top: -14px; left: 20px;
+      font-size: 1.4rem; background: white;
+      padding: 0 6px; border-radius: 8px;
+    }
+    .passage-title {
+      font-family: 'Baloo 2', cursive; font-size: 1.1rem; font-weight: 800;
+      color: #92400e; margin-bottom: 10px;
+    }
+    .rc-questions { display: flex; flex-direction: column; gap: 20px; }
+    .rc-q { background: #fafaf9; border: 2px solid var(--border); border-radius: 16px; padding: 18px; }
+    .rc-q-text { font-weight: 700; color: var(--text); margin-bottom: 12px; font-size: 0.95rem; }
+    .rc-options { display: flex; flex-direction: column; gap: 8px; }
+    .rc-opt {
+      background: white; border: 2px solid var(--border); border-radius: 10px;
+      padding: 10px 14px; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+      display: flex; align-items: center; gap: 10px;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      font-family: 'Quicksand', sans-serif;
+    }
+    .rc-opt:hover:not(.answered) { border-color: var(--violet); background: #faf5ff; transform: translateX(3px); }
+    .rc-opt.correct { border-color: var(--emerald); background: #f0fdf4; }
+    .rc-opt.wrong   { border-color: var(--rose); background: #fff1f2; }
+    .rc-opt-dot {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2.5px solid #d6d3d1; flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .rc-opt.correct .rc-opt-dot { background: var(--emerald); border-color: var(--emerald); }
+    .rc-opt.wrong   .rc-opt-dot { background: var(--rose); border-color: var(--rose); }
+    .rc-feedback {
+      margin-top: 10px; font-size: 0.85rem; font-weight: 700; padding: 8px 12px; border-radius: 8px;
+      display: none;
+    }
+    .rc-feedback.show { display: block; }
+    .rc-feedback.ok  { background: #dcfce7; color: #166534; }
+    .rc-feedback.bad { background: #fee2e2; color: #991b1b; }
+    .rc-submit-btn { margin-top: 8px; }
+
+    /* ─── DRAG AND DROP ─── */
+    .dnd-instruction {
+      background: #f0f9ff; border: 2px solid #bae6fd; border-radius: 14px;
+      padding: 14px 18px; margin-bottom: 22px;
+      font-size: 0.9rem; color: #075985; font-weight: 600; line-height: 1.5;
+    }
+    .dnd-layout { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+    .dnd-bank {
+      flex: 1; min-width: 180px;
+      background: #fafaf9; border: 2px dashed #d6d3d1;
+      border-radius: 18px; padding: 16px;
+    }
+    .dnd-chips-area { display: flex; flex-direction: column; gap: 6px; max-height: 420px; overflow-y: auto; padding-right: 4px; }
+    .dnd-chips-area::-webkit-scrollbar { width: 5px; }
+    .dnd-chips-area::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 999px; }
+    .dnd-chips-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+    .dnd-bank-title {
+      font-family: 'Baloo 2', cursive; font-size: 0.85rem; font-weight: 700;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 12px; text-align: center;
+    }
+    .dnd-chip {
+      background: white; border: 2px solid #d6d3d1; border-radius: 10px;
+      padding: 9px 14px; cursor: grab; font-weight: 700; font-size: 0.9rem;
+      display: flex; align-items: center; gap: 8px;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      user-select: none;
+    }
+    .dnd-chip:hover { border-color: var(--amber); box-shadow: 0 4px 14px rgba(245,158,11,0.2); transform: translateY(-2px); }
+    .dnd-chip.dragging { opacity: 0.45; transform: scale(0.97); }
+    .dnd-chip .chip-icon { font-size: 1.1rem; }
+
+    .dnd-zones { flex: 1.4; min-width: 240px; display: flex; flex-direction: column; gap: 14px; }
+    .dnd-zone {
+      border: 2.5px dashed #d6d3d1; border-radius: 16px; padding: 14px;
+      min-height: 72px; transition: border-color 0.2s, background 0.2s;
+    }
+    .dnd-zone.drag-over { border-color: var(--amber); background: #fffbeb; }
+    .dnd-zone.correct-zone { border-color: var(--emerald); background: #f0fdf4; border-style: solid; }
+    .dnd-zone.wrong-zone  { border-color: var(--rose); background: #fff1f2; border-style: solid; animation: shake 0.4s ease; }
+    .dnd-zone-label {
+      font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--muted); margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .dnd-zone-slot { min-height: 40px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .dnd-zone .dnd-chip { cursor: pointer; font-size: 0.85rem; padding: 6px 12px; }
+
+    .dnd-check-btn { margin-top: 16px; width: 100%; justify-content: center; }
+    .dnd-score-msg { display: none; margin-top: 14px; padding: 14px; border-radius: 12px; font-weight: 700; text-align: center; }
+    .dnd-score-msg.show { display: block; }
+
+    /* ─── RESULT SCREEN ─── */
+    .result-wrap { text-align: center; }
+    .result-big-icon { font-size: 90px; display: block; animation: popIn 0.5s cubic-bezier(.22,1,.36,1) both 0.1s; margin-bottom: 12px; }
+    @keyframes popIn { from{opacity:0;transform:scale(0.4)} to{opacity:1;transform:scale(1)} }
+    .result-title { font-family: 'Baloo 2', cursive; font-size: 2.2rem; font-weight: 800; color: var(--text); }
+    .result-sub { color: var(--muted); font-size: 1rem; margin: 6px 0 22px; }
+    .score-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin: 20px 0 28px; }
+    .score-box { background: #fafaf9; border: 2px solid var(--border); border-radius: 16px; padding: 16px 10px; text-align: center; }
+    .score-box .sb-val { font-family: 'Baloo 2', cursive; font-size: 1.9rem; font-weight: 800; }
+    .score-box .sb-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-top: 2px; }
+    .sb-quiz .sb-val { color: var(--sky); }
+    .sb-read .sb-val { color: var(--violet); }
+    .sb-drag .sb-val { color: var(--emerald); }
+    .medal-strip {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 12px 28px; border-radius: 999px; font-family: 'Baloo 2', cursive;
+      font-size: 1.3rem; font-weight: 800; margin-bottom: 24px;
+    }
+    .medal-gold   { background: #fef9c3; border: 2px solid #fbbf24; color: #92400e; }
+    .medal-silver { background: #f1f5f9; border: 2px solid #94a3b8; color: #475569; }
+    .medal-bronze { background: #fef3c7; border: 2px solid #d97706; color: #78350f; }
+
+    /* ─── TEACHER PANEL ─── */
+    .teacher-title { font-family: 'Baloo 2', cursive; font-size: 1.8rem; font-weight: 800; color: var(--violet); margin-bottom: 16px; }
+    .results-table { width: 100%; border-collapse: collapse; }
+    .results-table th {
+      background: #faf5ff; color: var(--violet); font-size: 0.78rem; text-transform: uppercase;
+      letter-spacing: 1px; padding: 10px 12px; text-align: left; border-bottom: 2px solid #e9d5ff;
+    }
+    .results-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; font-weight: 600; }
+    .results-table tr:last-child td { border-bottom: none; }
+    .results-table tr:hover td { background: #faf5ff; }
+    .results-scroll { max-height: 300px; overflow-y: auto; border: 2px solid #e9d5ff; border-radius: 16px; margin-bottom: 16px; }
+    .no-results { text-align: center; color: var(--muted); padding: 30px; font-weight: 700; }
+
+    .dnd-zone.dnd-zone-afternoon { border-color: #fed7aa; }
+    .dnd-zone.dnd-zone-afternoon.drag-over { border-color: var(--peach); background: #fff7ed; }
+    .dnd-zone.dnd-zone-afternoon.correct-zone { border-color: var(--emerald); background: #f0fdf4; border-style: solid; }
+    .dnd-zone.dnd-zone-afternoon.wrong-zone { border-color: var(--rose); background: #fff1f2; border-style: solid; animation: shake 0.4s ease; }
+
+    /* Touch support */
+    .dnd-chip { touch-action: none; }
+
+    /* Confetti canvas */
+    #confetti-canvas { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index: 999; }
+  </style>
+</head>
+<body>
+
+<div class="bg-blob blob1"></div>
+<div class="bg-blob blob2"></div>
+<div class="bg-blob blob3"></div>
+<canvas id="confetti-canvas"></canvas>
+
+<div class="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar" id="topbar">
+    <div class="logo">🌅 Daily Routines</div>
+    <div class="progress-pills" id="progressPills">
+      <div class="pill" id="pill0"></div>
+      <div class="pill" id="pill1"></div>
+      <div class="pill" id="pill2"></div>
+    </div>
+    <div class="player-chip" id="playerChip" style="display:none"></div>
+  </div>
+
+  <!-- ══════ START SCREEN ══════ -->
+  <div class="card" id="startScreen">
+    <div class="section-tag">🚀 Welcome, Hero!</div>
+    <h2 class="screen-title">Daily Routines Mission</h2>
+    <p class="screen-sub">Practice your daily routine vocabulary through three exciting activities. Enter your name and get started!</p>
+    <input class="name-input" type="text" id="studentName" placeholder="✏️ Your name…" />
+    <div class="activity-grid" id="activityGrid">
+      <div class="activity-card" onclick="startActivity(0)">
+        <span class="ac-icon">🧩</span>
+        <div class="ac-title">Quiz</div>
+        <div class="ac-desc">Answer 4 questions about daily routines</div>
+      </div>
+      <div class="activity-card locked" id="act1card">
+        <span class="ac-icon">📖</span>
+        <div class="ac-title">Reading</div>
+        <div class="ac-desc">Read a passage &amp; answer questions</div>
+      </div>
+      <div class="activity-card locked" id="act2card">
+        <span class="ac-icon">🧲</span>
+        <div class="ac-title">Drag &amp; Drop</div>
+        <div class="ac-desc">Sort activities into morning, afternoon &amp; night</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ ACTIVITY: QUIZ ══════ -->
+  <div class="card hidden" id="quizScreen">
+    <div class="game-header">
+      <div class="game-title">🧩 Quiz Time</div>
+      <div class="score-badge">⭐ <span id="quizScore">0</span></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="quizProgress"></div></div>
+    <div id="quizArea"></div>
+  </div>
+
+  <!-- ══════ ACTIVITY: READING COMPREHENSION ══════ -->
+  <div class="card hidden" id="readingScreen">
+    <div class="section-tag blue">📖 Activity 2 of 3</div>
+    <h2 class="screen-title">Reading Comprehension</h2>
+    <p class="screen-sub">Read the passage carefully, then answer the questions below.</p>
+
+    <div class="reading-passage">
+      <div class="passage-title">My Daily Routines</div>
+      Every day I follow the same routines. In the morning, I <strong>get up</strong> at seven o'clock. First, I <strong>brush my teeth</strong> in the bathroom. Then I <strong>wash my hands</strong> and <strong>have breakfast</strong> — I love cereal! After breakfast, I <strong>get dressed</strong> in my school clothes and <strong>go to school</strong> with my mum.<br><br>
+      At school, I <strong>meet my friends</strong> at the door. We study English and Maths. At break time, we <strong>go to the playground</strong> and run and play together. It is so fun!<br><br>
+      In the afternoon, I <strong>go home</strong> and <strong>have lunch</strong> with my family. Sometimes we <strong>go shopping</strong> at the supermarket together. Then I sit at my desk and <strong>do my homework</strong>.<br><br>
+      In the evening, I <strong>have dinner</strong> with my family. After dinner, I <strong>have a shower</strong> and put on my pyjamas. Before sleeping, I <strong>read a book</strong> in bed. Finally, I <strong>go to bed</strong> at nine o'clock. Good night! 🌙
+    </div>
+
+    <div class="rc-questions" id="rcQuestions"></div>
+
+    <div class="btn-row" id="rcNextBtn" style="display:none">
+      <button class="btn btn-violet" onclick="finishReading()">Continue to Drag &amp; Drop →</button>
+    </div>
+  </div>
+
+  <!-- ══════ ACTIVITY: DRAG AND DROP ══════ -->
+  <div class="card hidden" id="dragScreen">
+    <div class="section-tag green">🧲 Activity 3 of 3</div>
+    <h2 class="screen-title">Sort the Routines!</h2>
+    <p class="screen-sub">Drag each activity card into the correct time of day — Morning 🌄, Afternoon ☀️, or Night 🌙</p>
+
+    <div class="dnd-instruction">
+      💡 <strong>How to play:</strong> Drag a card from the bank and drop it into Morning, Afternoon, or Night. Click a placed card to move it back. Then press <em>Check Answers</em>!
+    </div>
+
+    <div class="dnd-layout">
+      <div class="dnd-bank">
+        <div class="dnd-bank-title">🃏 Cards</div>
+        <div class="dnd-chips-area" id="dndBank"></div>
+      </div>
+      <div class="dnd-zones">
+        <div class="dnd-zone" id="zone-morning" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'morning')">
+          <div class="dnd-zone-label">🌄 Morning</div>
+          <div class="dnd-zone-slot" id="slot-morning"></div>
+        </div>
+        <div class="dnd-zone dnd-zone-afternoon" id="zone-afternoon" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'afternoon')">
+          <div class="dnd-zone-label">☀️ Afternoon</div>
+          <div class="dnd-zone-slot" id="slot-afternoon"></div>
+        </div>
+        <div class="dnd-zone" id="zone-night" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'night')">
+          <div class="dnd-zone-label">🌙 Night</div>
+          <div class="dnd-zone-slot" id="slot-night"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-emerald dnd-check-btn" onclick="checkDnD()">✅ Check Answers</button>
+    <div class="dnd-score-msg" id="dndMsg"></div>
+    <div class="btn-row" id="dndNextBtn" style="display:none">
+      <button class="btn btn-amber" onclick="showFinalResults()">🏆 See Final Results →</button>
+    </div>
+  </div>
+
+  <!-- ══════ FINAL RESULT SCREEN ══════ -->
+  <div class="card hidden" id="resultScreen">
+    <div class="result-wrap">
+      <span class="result-big-icon" id="resultEmoji">🏆</span>
+      <h2 class="result-title">Mission Complete!</h2>
+      <p class="result-sub" id="resultSub"></p>
+      <div class="score-grid">
+        <div class="score-box sb-quiz">
+          <div class="sb-val" id="res-quiz">0/16</div>
+          <div class="sb-label">Quiz</div>
+        </div>
+        <div class="score-box sb-read">
+          <div class="sb-val" id="res-read">0/6</div>
+          <div class="sb-label">Reading</div>
+        </div>
+        <div class="score-box sb-drag">
+          <div class="sb-val" id="res-drag">0/16</div>
+          <div class="sb-label">Drag &amp; Drop</div>
+        </div>
+      </div>
+      <div id="medalStrip"></div>
+      <div class="btn-row" style="justify-content:center">
+        <button class="btn btn-amber" onclick="restartAll()">🔄 Play Again</button>
+        <button class="btn btn-ghost" onclick="goHome()">🏠 Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ TEACHER PANEL ══════ -->
+  <div class="card hidden" id="teacherPanel">
+    <div class="teacher-title">📊 Teacher Dashboard</div>
+    <div class="results-scroll">
+      <table class="results-table" id="resultsTable">
+        <thead><tr><th>Name</th><th>Quiz</th><th>Reading</th><th>Drag&Drop</th><th>Total</th><th>Date</th></tr></thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="clearResults()">🗑 Clear All</button>
+      <button class="btn btn-ghost" onclick="goHome()">← Back</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let student = "";
+let scores = { quiz: 0, reading: 0, drag: 0 };
+let completedActivities = [];
+
+/* ══════════════════════════════════════
+   SECRET TEACHER ACCESS — Ctrl+Shift+T
+══════════════════════════════════════ */
+const TEACHER_PASSWORD = "teacher123";
+document.addEventListener("keydown", function(e) {
+  if (e.ctrlKey && e.shiftKey && e.key === "T") {
+    e.preventDefault();
+    const pwd = prompt("🔒 Teacher access — enter password:");
+    if (pwd === TEACHER_PASSWORD) {
+      showTeacherPanel();
+    } else if (pwd !== null) {
+      alert("❌ Incorrect password.");
+    }
+  }
+});
+
+/* ══════════════════════════════════════
+   START / NAVIGATION
+══════════════════════════════════════ */
+function requireName() {
+  student = document.getElementById("studentName").value.trim();
+  if (!student) {
+    const inp = document.getElementById("studentName");
+    inp.style.borderColor = "#f43f5e";
+    inp.focus();
+    return false;
+  }
+  document.getElementById("playerChip").textContent = "🦸 " + student;
+  document.getElementById("playerChip").style.display = "";
+  return true;
+}
+
+function startActivity(idx) {
+  if (!requireName()) return;
+  if (idx === 1 && !completedActivities.includes(0)) return;
+  if (idx === 2 && !completedActivities.includes(1)) return;
+
+  hideAll();
+  if (idx === 0) initQuiz();
+  if (idx === 1) initReading();
+  if (idx === 2) initDnD();
+}
+
+function hideAll() {
+  ['startScreen','quizScreen','readingScreen','dragScreen','resultScreen','teacherPanel']
+    .forEach(id => document.getElementById(id).classList.add('hidden'));
+}
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+function updatePills() {
+  ['pill0','pill1','pill2'].forEach((pid,i) => {
+    const p = document.getElementById(pid);
+    p.className = 'pill';
+    if (completedActivities.includes(i)) p.classList.add('done');
+    else if (completedActivities.length === i) p.classList.add('active');
+  });
+}
+
+/* ══════════════════════════════════════
+   QUIZ ACTIVITY
+══════════════════════════════════════ */
+const quizQuestions = [
+  {
+    q: "I wake up. I _______ up! 🌅",
+    emoji: "🛏️",
+    opts: ["get", "go", "have"],
+    a: "get"
+  },
+  {
+    q: "In the morning I brush my _______.",
+    emoji: "🪥",
+    opts: ["hair", "teeth", "hands"],
+    a: "teeth"
+  },
+  {
+    q: "I eat food in the morning. I have _______.",
+    emoji: "🥣",
+    opts: ["dinner", "lunch", "breakfast"],
+    a: "breakfast"
+  },
+  {
+    q: "Before I eat, I wash my _______.",
+    emoji: "🙌",
+    opts: ["hands", "face", "feet"],
+    a: "hands"
+  },
+  {
+    q: "I put on my clothes. I get _______.",
+    emoji: "👕",
+    opts: ["up", "dressed", "home"],
+    a: "dressed"
+  },
+  {
+    q: "Every day I _______ to school.",
+    emoji: "🎒",
+    opts: ["go", "have", "read"],
+    a: "go"
+  },
+  {
+    q: "At school I see my _______.",
+    emoji: "👫",
+    opts: ["dinner", "friends", "homework"],
+    a: "friends"
+  },
+  {
+    q: "At break time I go to the _______.",
+    emoji: "⛹️",
+    opts: ["playground", "supermarket", "bed"],
+    a: "playground"
+  },
+  {
+    q: "After school I do my _______.",
+    emoji: "📝",
+    opts: ["shopping", "homework", "shower"],
+    a: "homework"
+  },
+  {
+    q: "After school I _______ home.",
+    emoji: "🏠",
+    opts: ["read", "go", "have"],
+    a: "go"
+  },
+  {
+    q: "At midday I eat _______.",
+    emoji: "🥗",
+    opts: ["breakfast", "dinner", "lunch"],
+    a: "lunch"
+  },
+  {
+    q: "I buy food at the shop. I go _______.",
+    emoji: "🛒",
+    opts: ["shopping", "to bed", "to school"],
+    a: "shopping"
+  },
+  {
+    q: "In the evening my family and I have _______.",
+    emoji: "🍽️",
+    opts: ["breakfast", "dinner", "lunch"],
+    a: "dinner"
+  },
+  {
+    q: "Before sleeping I _______ a book.",
+    emoji: "📚",
+    opts: ["read", "watch", "write"],
+    a: "read"
+  },
+  {
+    q: "I wash my body. I have a _______.",
+    emoji: "🚿",
+    opts: ["breakfast", "shower", "lunch"],
+    a: "shower"
+  },
+  {
+    q: "I am tired. I _______ to bed.",
+    emoji: "🌙",
+    opts: ["go", "have", "get"],
+    a: "go"
+  }
+];
+const letters = ['A','B','C','D'];
+let qCurrent = 0;
+let qScore = 0;
+
+function initQuiz() {
+  qCurrent = 0; qScore = 0;
+  document.getElementById("quizScore").textContent = 0;
+  show("quizScreen");
+  loadQuizQ();
+}
+
+function loadQuizQ() {
+  document.getElementById("quizProgress").style.width = (qCurrent / quizQuestions.length * 100) + "%";
+  const q = quizQuestions[qCurrent];
+  document.getElementById("quizArea").innerHTML = `
+    <p class="q-num">Question ${qCurrent+1} of ${quizQuestions.length}</p>
+    <div style="font-size:3.5rem;text-align:center;margin-bottom:14px;animation:popIn 0.4s cubic-bezier(.22,1,.36,1)">${q.emoji}</div>
+    <p class="q-text">${q.q}</p>
+    <div class="options">
+      ${q.opts.map((o,i) => `
+        <button class="option-btn" onclick="selectQuizAnswer(this,'${o.replace(/'/g,"\\'")}')">
+          <span class="opt-letter">${letters[i]}</span>${o}
+        </button>`).join('')}
+    </div>`;
+}
+
+function selectQuizAnswer(btn, answer) {
+  const q = quizQuestions[qCurrent];
+  document.querySelectorAll(".option-btn").forEach(b => b.disabled = true);
+  if (answer === q.a) { btn.classList.add("correct"); qScore++; }
+  else {
+    btn.classList.add("wrong");
+    document.querySelectorAll(".option-btn").forEach(b => {
+      if (b.textContent.trim().slice(1).trim() === q.a) b.classList.add("correct");
+    });
+  }
+  document.getElementById("quizScore").textContent = qScore;
+  setTimeout(() => {
+    qCurrent++;
+    if (qCurrent < quizQuestions.length) { loadQuizQ(); }
+    else { finishQuiz(); }
+  }, 900);
+}
+
+function finishQuiz() {
+  scores.quiz = qScore;
+  completedActivities.push(0);
+  updatePills();
+  // Unlock reading
+  const card1 = document.getElementById("act1card");
+  card1.classList.remove("locked");
+  card1.onclick = () => startActivity(1);
+  document.getElementById("act0card")?.classList.add("completed");
+
+  hideAll(); show("startScreen");
+  // Update activity grid
+  document.querySelector(".activity-grid .activity-card:first-child").classList.add("completed");
+  alert(`Great job, ${student}! Quiz complete! Score: ${qScore}/16\nNow try Reading Comprehension! 📖`);
+}
+
+/* ══════════════════════════════════════
+   READING COMPREHENSION ACTIVITY
+══════════════════════════════════════ */
+const rcData = [
+  {
+    q: "What does the child do first in the morning?",
+    opts: ["Have breakfast", "Get up", "Go to school", "Brush teeth"],
+    a: "Get up",
+    hint: "Read the first sentence of the morning paragraph!"
+  },
+  {
+    q: "What does the child eat for breakfast?",
+    opts: ["Toast", "Eggs", "Cereal", "Fruit"],
+    a: "Cereal",
+    hint: "Look for the word 'love' in the breakfast sentence."
+  },
+  {
+    q: "What do the friends do at break time?",
+    opts: ["Do homework", "Have lunch", "Go to the playground", "Read a book"],
+    a: "Go to the playground",
+    hint: "Look at the school paragraph — what happens at break time?"
+  },
+  {
+    q: "When does the child do homework?",
+    opts: ["Before breakfast", "In the afternoon", "At night", "At school"],
+    a: "In the afternoon",
+    hint: "Check the afternoon paragraph carefully!"
+  },
+  {
+    q: "What does the child do just before going to bed?",
+    opts: ["Have dinner", "Have a shower", "Read a book", "Go shopping"],
+    a: "Read a book",
+    hint: "Read the last two sentences of the evening paragraph."
+  },
+  {
+    q: "What time does the child go to bed?",
+    opts: ["Eight o'clock", "Seven o'clock", "Ten o'clock", "Nine o'clock"],
+    a: "Nine o'clock",
+    hint: "Look at the very last sentence!"
+  }
+];
+let rcAnswered = [false, false, false, false, false, false];
+let rcScore = 0;
+
+function initReading() {
+  rcAnswered = new Array(rcData.length).fill(false);
+  rcScore = 0;
+  show("readingScreen");
+  const container = document.getElementById("rcQuestions");
+  container.innerHTML = rcData.map((item, i) => `
+    <div class="rc-q" id="rcq${i}">
+      <div class="rc-q-text">${i+1}. ${item.q}</div>
+      <div class="rc-options">
+        ${item.opts.map((o,j) => `
+          <div class="rc-opt" id="rco_${i}_${j}" onclick="selectRC(${i},${j},'${o.replace(/'/g,"\\'")}')">
+            <span class="rc-opt-dot"></span>${o}
+          </div>`).join('')}
+      </div>
+      <div class="rc-feedback" id="rcfb${i}"></div>
+    </div>`).join('');
+}
+
+function selectRC(qIdx, optIdx, answer) {
+  if (rcAnswered[qIdx]) return;
+  rcAnswered[qIdx] = true;
+  const item = rcData[qIdx];
+  const correct = answer === item.a;
+  if (correct) rcScore++;
+
+  document.querySelectorAll(`[id^="rco_${qIdx}_"]`).forEach(el => el.classList.add("answered"));
+
+  const chosen = document.getElementById(`rco_${qIdx}_${optIdx}`);
+  chosen.classList.add(correct ? "correct" : "wrong");
+
+  if (!correct) {
+    // Highlight correct
+    item.opts.forEach((o, j) => {
+      if (o === item.a) document.getElementById(`rco_${qIdx}_${j}`).classList.add("correct");
+    });
+  }
+
+  const fb = document.getElementById(`rcfb${qIdx}`);
+  fb.textContent = correct ? "✅ Correct! Well done!" : `❌ Not quite. Hint: ${item.hint}`;
+  fb.className = "rc-feedback show " + (correct ? "ok" : "bad");
+
+  // Check if all answered
+  if (rcAnswered.every(Boolean)) {
+    document.getElementById("rcNextBtn").style.display = "flex";
+  }
+}
+
+function finishReading() {
+  scores.reading = rcScore;
+  completedActivities.push(1);
+  updatePills();
+  const card2 = document.getElementById("act2card");
+  card2.classList.remove("locked");
+  card2.onclick = () => startActivity(2);
+
+  hideAll(); show("startScreen");
+  document.querySelectorAll(".activity-grid .activity-card")[1].classList.add("completed");
+  alert(`Reading done! Score: ${rcScore}/4\nNow try the Drag & Drop activity! 🧲`);
+}
+
+/* ══════════════════════════════════════
+   DRAG AND DROP ACTIVITY
+══════════════════════════════════════ */
+const dndItems = [
+  { id:"dd01", icon:"🛏️", label:"I get up",           answer:"morning"   },
+  { id:"dd02", icon:"🪥", label:"I brush my teeth",   answer:"morning"   },
+  { id:"dd03", icon:"🥣", label:"I have breakfast",   answer:"morning"   },
+  { id:"dd04", icon:"🙌", label:"I wash my hands",    answer:"morning"   },
+  { id:"dd05", icon:"👕", label:"I get dressed",      answer:"morning"   },
+  { id:"dd06", icon:"🎒", label:"I go to school",     answer:"morning"   },
+  { id:"dd07", icon:"👫", label:"I meet my friends",  answer:"afternoon" },
+  { id:"dd08", icon:"⛹️", label:"I go to playground", answer:"afternoon" },
+  { id:"dd09", icon:"📝", label:"I do my homework",   answer:"afternoon" },
+  { id:"dd10", icon:"🏠", label:"I go home",          answer:"afternoon" },
+  { id:"dd11", icon:"🥗", label:"I have lunch",       answer:"afternoon" },
+  { id:"dd12", icon:"🛒", label:"I go shopping",      answer:"afternoon" },
+  { id:"dd13", icon:"🍽️", label:"I have dinner",      answer:"night"     },
+  { id:"dd14", icon:"📚", label:"I read a book",      answer:"night"     },
+  { id:"dd15", icon:"🚿", label:"I have a shower",    answer:"night"     },
+  { id:"dd16", icon:"🌙", label:"I go to bed",        answer:"night"     },
+];
+let dndPlaced = {}; // id -> zone
+let dragItem = null;
+
+function initDnD() {
+  dndPlaced = {};
+  show("dragScreen");
+  document.getElementById("dndMsg").className = "dnd-score-msg";
+  document.getElementById("dndMsg").textContent = "";
+  document.getElementById("dndNextBtn").style.display = "none";
+
+  // Shuffle
+  const shuffled = [...dndItems].sort(() => Math.random() - 0.5);
+  const bank = document.getElementById("dndBank");
+  bank.innerHTML = "";
+  document.getElementById("slot-morning").innerHTML = "";
+  document.getElementById("slot-afternoon").innerHTML = "";
+  document.getElementById("slot-night").innerHTML = "";
+  document.querySelectorAll(".dnd-zone").forEach(z => z.className = "dnd-zone");
+
+  shuffled.forEach(item => {
+    bank.appendChild(createChip(item, "bank"));
+  });
+}
+
+function createChip(item, location) {
+  const div = document.createElement("div");
+  div.className = "dnd-chip";
+  div.draggable = true;
+  div.dataset.id = item.id;
+  div.innerHTML = `<span class="chip-icon">${item.icon}</span>${item.label}`;
+  div.addEventListener("dragstart", e => {
+    dragItem = item.id;
+    div.classList.add("dragging");
+    e.dataTransfer.setData("text/plain", item.id);
+  });
+  div.addEventListener("dragend", () => div.classList.remove("dragging"));
+  // Click to remove from zone back to bank
+  if (location !== "bank") {
+    div.addEventListener("click", () => returnToBank(item.id));
+  }
+  // Touch support
+  div.addEventListener("touchstart", touchStart, {passive:true});
+  div.addEventListener("touchmove", touchMove, {passive:false});
+  div.addEventListener("touchend", touchEnd);
+  return div;
+}
+
+function onDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add("drag-over");
+}
+function onDragLeave(e) {
+  e.currentTarget.classList.remove("drag-over");
+}
+function onDrop(e, zone) {
+  e.preventDefault();
+  e.currentTarget.classList.remove("drag-over");
+  const id = e.dataTransfer.getData("text/plain") || dragItem;
+  if (!id) return;
+  placeChip(id, zone);
+}
+
+function placeChip(id, zone) {
+  const item = dndItems.find(i => i.id === id);
+  if (!item) return;
+  // Remove from current location
+  const existing = document.querySelector(`[data-id="${id}"]`);
+  if (existing) existing.remove();
+  dndPlaced[id] = zone;
+  const slot = document.getElementById("slot-" + zone);
+  slot.appendChild(createChip(item, zone));
+}
+
+function returnToBank(id) {
+  const existing = document.querySelector(`[data-id="${id}"]`);
+  if (existing) existing.remove();
+  delete dndPlaced[id];
+  const item = dndItems.find(i => i.id === id);
+  document.getElementById("dndBank").appendChild(createChip(item, "bank"));
+}
+
+function checkDnD() {
+  let correct = 0;
+  dndItems.forEach(item => {
+    if (dndPlaced[item.id] === item.answer) correct++;
+  });
+
+  // Visual feedback per zone
+  ["morning","afternoon","night"].forEach(zone => {
+    const slot = document.getElementById("slot-" + zone);
+    const zoneEl = document.getElementById("zone-" + zone);
+    let allRight = true;
+    slot.querySelectorAll(".dnd-chip").forEach(chip => {
+      const item = dndItems.find(i => i.id === chip.dataset.id);
+      if (item && item.answer !== zone) allRight = false;
+    });
+    const afClass = zone === "afternoon" ? " dnd-zone-afternoon" : "";
+    zoneEl.className = "dnd-zone" + afClass + " " + (allRight && slot.children.length > 0 ? "correct-zone" : "wrong-zone");
+  });
+
+  const total = dndItems.length;
+  const msg = document.getElementById("dndMsg");
+  msg.className = "dnd-score-msg show";
+  if (correct === total) {
+    msg.style.background = "#dcfce7"; msg.style.color = "#166534";
+    msg.textContent = `🎉 Perfect! All ${correct}/${total} correct! Amazing work!`;
+    fireConfetti();
+  } else {
+    msg.style.background = "#fef9c3"; msg.style.color = "#92400e";
+    msg.textContent = `📊 Score: ${correct}/${total} — Try moving the wrong ones and check again!`;
+  }
+  scores.drag = correct;
+  document.getElementById("dndNextBtn").style.display = "flex";
+}
+
+/* ── Touch drag support ── */
+let touchChipId = null, touchClone = null;
+function touchStart(e) {
+  touchChipId = e.currentTarget.dataset.id;
+  const chip = e.currentTarget;
+  touchClone = chip.cloneNode(true);
+  touchClone.style.cssText = `position:fixed;opacity:0.7;pointer-events:none;z-index:9999;border-radius:10px;background:white;border:2px solid #fbbf24;padding:9px 14px;font-family:Quicksand,sans-serif;font-weight:700;font-size:0.9rem;display:flex;align-items:center;gap:8px;`;
+  document.body.appendChild(touchClone);
+}
+function touchMove(e) {
+  e.preventDefault();
+  if (!touchClone) return;
+  const t = e.touches[0];
+  touchClone.style.left = (t.clientX - 60) + "px";
+  touchClone.style.top  = (t.clientY - 20) + "px";
+}
+function touchEnd(e) {
+  if (touchClone) { touchClone.remove(); touchClone = null; }
+  if (!touchChipId) return;
+  const t = e.changedTouches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  if (!el) { touchChipId = null; return; }
+  const zone = el.closest(".dnd-zone");
+  if (zone) {
+    const z = zone.id.replace("zone-","");
+    placeChip(touchChipId, z);
+  }
+  touchChipId = null;
+}
+
+/* ══════════════════════════════════════
+   FINAL RESULTS
+══════════════════════════════════════ */
+function showFinalResults() {
+  const total = scores.quiz + scores.reading + scores.drag;
+  const max = 16 + 6 + 16; // 38
+  const pct = total / max;
+
+  let emoji, medal, medalClass;
+  if (pct >= 0.85)      { emoji="🏆"; medal="GOLD MEDAL";   medalClass="medal-gold"; }
+  else if (pct >= 0.65) { emoji="🥈"; medal="SILVER MEDAL"; medalClass="medal-silver"; }
+  else                  { emoji="🥉"; medal="BRONZE MEDAL"; medalClass="medal-bronze"; }
+
+  completedActivities.push(2);
+  updatePills();
+
+  document.getElementById("resultEmoji").textContent = emoji;
+  document.getElementById("resultSub").textContent = `Congratulations, ${student}! Total: ${total}/${max}`;
+  document.getElementById("res-quiz").textContent = `${scores.quiz}/16`;
+  document.getElementById("res-read").textContent = `${scores.reading}/6`;
+  document.getElementById("res-drag").textContent = `${scores.drag}/16`;
+  document.getElementById("medalStrip").innerHTML = `<div class="medal-strip ${medalClass}">${emoji} ${medal}</div>`;
+
+  saveResult();
+  fireConfetti();
+  hideAll(); show("resultScreen");
+}
+
+/* ══════════════════════════════════════
+   PERSISTENCE
+══════════════════════════════════════ */
+/* ══════════════════════════════════════
+   SAVE — localStorage + Google Forms
+══════════════════════════════════════ */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw4T3_4M0LGn9Y64sdkyLJPztv5gBwzB8rA7XPFArdWNqyCSY4vNTksIgQ2KJMOY02R/exec";
+
+function saveResult() {
+  const total = scores.quiz + scores.reading + scores.drag;
+  const fecha = new Date().toLocaleString("es-CO", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit"
+  });
+
+  /* 1 — localStorage (backup local) */
+  const results = JSON.parse(localStorage.getItem("drm2_results") || "[]");
+  results.push({ name: student, quiz: scores.quiz, reading: scores.reading, drag: scores.drag, total, date: fecha });
+  localStorage.setItem("drm2_results", JSON.stringify(results));
+
+  /* 2 — Google Apps Script (envío a Google Sheet) */
+  const params = new URLSearchParams({
+    nombre:      student,
+    quiz:        `${scores.quiz}/16`,
+    lectura:     `${scores.reading}/6`,
+    dragAndDrop: `${scores.drag}/16`,
+    total:       `${total}/38`,
+    fecha:       fecha
+  });
+
+  const img = new Image();
+  img.src = `${SCRIPT_URL}?${params.toString()}`;
+}
+
+function showTeacherPanel() {
+  hideAll(); show("teacherPanel");
+  const results = JSON.parse(localStorage.getItem("drm2_results") || "[]");
+  const tbody = document.getElementById("resultsBody");
+  if (!results.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="no-results">No results yet 🎒</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = [...results].reverse().map(r =>
+    `<tr>
+      <td><strong>${r.name}</strong></td>
+      <td>${r.quiz}/4</td>
+      <td>${r.reading ?? '-'}/4</td>
+      <td>${r.drag ?? '-'}/6</td>
+      <td><strong>${r.total}/38</strong></td>
+      <td style="color:var(--muted);font-size:0.78rem">${r.date}</td>
+    </tr>`).join('');
+}
+
+function clearResults() {
+  if (confirm("Clear all results?")) { localStorage.removeItem("drm2_results"); showTeacherPanel(); }
+}
+
+function restartAll() {
+  scores = { quiz: 0, reading: 0, drag: 0 };
+  completedActivities = [];
+  updatePills();
+  goHome();
+}
+function goHome() { location.reload(); }
+
+/* ══════════════════════════════════════
+   CONFETTI
+══════════════════════════════════════ */
+function fireConfetti() {
+  const canvas = document.getElementById("confetti-canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const pieces = Array.from({length:120}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height - canvas.height,
+    r: Math.random() * 7 + 4,
+    d: Math.random() * 80 + 20,
+    color: ["#f59e0b","#0ea5e9","#10b981","#8b5cf6","#f43f5e","#fbbf24"][Math.floor(Math.random()*6)],
+    tilt: Math.random() * 20 - 10,
+    tiltSpeed: Math.random() * 0.1 + 0.05,
+    speed: Math.random() * 3 + 1.5,
+    angle: 0
+  }));
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    pieces.forEach(p => {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.tilt * Math.PI/180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.r/2, -p.r/2, p.r, p.r * 0.5);
+      ctx.restore();
+      p.y += p.speed;
+      p.tilt += p.tiltSpeed;
+      p.angle += 0.05;
+      p.x += Math.sin(p.angle) * 1.2;
+      if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
+    });
+    frame++;
+    if (frame < 180) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+  draw();
+}
+
+// Initialize pills
+updatePills();
+</script>
+</body>
+</html>
