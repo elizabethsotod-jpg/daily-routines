@@ -1078,8 +1078,10 @@ function saveResult() {
     fecha:       fecha
   });
 
-  const img = new Image();
-  img.src = `${SCRIPT_URL}?${params.toString()}`;
+  fetch(`${SCRIPT_URL}?${params.toString()}`, {
+    method: "GET",
+    mode: "no-cors"
+  }).catch(() => {});
 }
 
 function showTeacherPanel() {
